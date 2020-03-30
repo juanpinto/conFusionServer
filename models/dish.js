@@ -59,5 +59,5 @@ const dishSchema = new Schema({
     comments: [commentSchema]
 }, { timestamps: true });
 
-var Dish = mongoose.model('Dish', dishSchema)
-module.exports = Dish
+var Dishes = mongoose.model('Dish', dishSchema)
+module.exports = Dishes

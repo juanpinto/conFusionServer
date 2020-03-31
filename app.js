@@ -1,11 +1,12 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
+const passport = require('passport');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
+const authenticate = require('./authenticate');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -49,6 +50,8 @@ app.use(session({
   store: new FileStore()
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
 /**
  * We allow the user to access this API. Even if they are not authenticated.
  * We achive this by placing this route before the authenticateUser.
@@ -69,20 +72,14 @@ app.use('/users', usersRouter);
 function authenticateUser(request, response, next) {
   console.log(request.session);
 
-  if(!request.session.user) {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
+  //request.user is added by passport.
+  if (!request.user) {
+    var err = new Error('unauthorized');
+    err.status = 403;
+    return next(err);
   }
   else {
-    if (request.session.user === 'authenticated') {
-      next();
-    }
-    else {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-    }
+    next();
   }
 }
 

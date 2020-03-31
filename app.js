@@ -49,6 +49,16 @@ app.use(session({
   store: new FileStore()
 }));
 
+/**
+ * We allow the user to access this API. Even if they are not authenticated.
+ * We achive this by placing this route before the authenticateUser.
+ * 
+ * The code place in here is going to happen in order. so the following
+ * routes will happen without even knowing that there is a MIDDLEWARE AUTH METHOD.
+ */
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
 /** 
  * Before leting the client use the API or
  *  Any of the public data we want to make sure
@@ -59,37 +69,19 @@ app.use(session({
 function authenticateUser(request, response, next) {
   console.log(request.session);
 
-  if (!request.session.user) {
-
-    var authHeader = request.headers.authorization;
-    if (!authHeader) {
-      var error = new Error('Unauthorized');
-      response.setHeader('WWW-Authenticate', 'Basic');
-      error.status = 401;
-      next(error);
-      return;
-    }
-
-    var authCredentials = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    var username = authCredentials[0];
-    var password = authCredentials[1];
-
-    if (username == 'admin' && password == 'password') {
-      request.session.user = 'admin';
+  if(!request.session.user) {
+      var err = new Error('You are not authenticated!');
+      err.status = 403;
+      return next(err);
+  }
+  else {
+    if (request.session.user === 'authenticated') {
       next();
-    } else {
-      var error = new Error('Unauthorized');
-      response.setHeader('WWWW-Authenticate', 'Basic');
-      error.status = 401;
-      next(error);
     }
-  } else {
-    if (request.session.user == 'admin') {
-      next();
-    } else {
-      var error = new Error('Unauthorized');
-      error.status = 401;
-      next(error);
+    else {
+      var err = new Error('You are not authenticated!');
+      err.status = 403;
+      return next(err);
     }
   }
 }
@@ -98,8 +90,6 @@ app.use(authenticateUser);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/dishes', dishRouter);
 app.use('/leaders', leaderRouter);
 app.use('/promotions', promotionRouter);

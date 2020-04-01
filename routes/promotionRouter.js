@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const authenticator = require('../authenticate');
 const Promotions = require('../models/promotion');
 
 const promotionRouter = express.Router();
@@ -18,7 +18,7 @@ promotionRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post((request, response, next) => {
+    .post(authenticator.verifyUser, (request, response, next) => {
         Promotions.create(request.body).then((promotion) => {
             response.statusCode = 200;
             response.setHeader('Content-Type', 'application/json');
@@ -27,11 +27,11 @@ promotionRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .put((request, response, next) => {
+    .put(authenticator.verifyUser, (request, response, next) => {
         response.statusCode = 403;
         response.end("Put operation not supported");
     })
-    .delete((request, response, next) => {
+    .delete(authenticator.verifyUser, (request, response, next) => {
         Promotions.deleteMany({}).then((result) => {
 
             response.statusCode = 200;
@@ -53,12 +53,12 @@ promotionRouter.route('/:promotionId')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post((request, response, next) => {
+    .post(authenticator.verifyUser, (request, response, next) => {
         response.statusCode = 403;
         response.end(`Pust operation not supported on: /dishes/${request.params.promotionId}`);
     })
-    .put((request, response, next) => {
-        Promotions.findByIdAndUpdate(request.params.promotionId, { $set: request.body }, { new: true }).then((promotion) => {
+    .put(authenticator.verifyUser, (request, response, next) => {
+        Promotions.findByIdAndUpdate(request.params.promotionId, {$set: request.body}, {new: true}).then((promotion) => {
 
             response.statusCode = 200;
             response.setHeader('Content-Type', 'application/json');
@@ -67,7 +67,7 @@ promotionRouter.route('/:promotionId')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .delete((request, response, next) => {
+    .delete(authenticator.verifyUser, (request, response, next) => {
         Promotions.findByIdAndRemove(request.params.promotionId).then((result) => {
 
             response.statusCode = 200;

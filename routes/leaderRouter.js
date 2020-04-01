@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const authenticator = require('../authenticate');
 const Leaders = require('../models/leader');
 
 const leaderRouter = express.Router();
@@ -18,7 +18,7 @@ leaderRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post((request, response, next) => {
+    .post(authenticator.verifyUser, (request, response, next) => {
         Leaders.create(request.body).then((leader) => {
             response.statusCode = 200;
             response.setHeader('Content-Type', 'application/json');
@@ -27,11 +27,11 @@ leaderRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .put((request, response, next) => {
+    .put(authenticator.verifyUser, (request, response, next) => {
         response.statusCode = 403;
         response.end("Put operation not supported");
     })
-    .delete((request, response, next) => {
+    .delete(authenticator.verifyUser, (request, response, next) => {
         Leaders.deleteMany({}).then((result) => {
 
             response.statusCode = 200;
@@ -42,7 +42,7 @@ leaderRouter.route('/')
             .catch((error) => next(error));
     })
 
-    leaderRouter.route('/:leaderId')
+leaderRouter.route('/:leaderId')
     .get((request, response, next) => {
         Leaders.findById(request.params.leaderId).then((leader) => {
 
@@ -53,12 +53,12 @@ leaderRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post((request, response, next) => {
+    .post(authenticator.verifyUser, (request, response, next) => {
         response.statusCode = 403;
         response.end(`Pust operation not supported on: /leaders/${request.params.leaderId}`);
     })
-    .put((request, response, next) => {
-        Leaders.findByIdAndUpdate(request.params.leaderId, { $set: request.body }, { new: true }).then((leader) => {
+    .put(authenticator.verifyUser, (request, response, next) => {
+        Leaders.findByIdAndUpdate(request.params.leaderId, {$set: request.body}, {new: true}).then((leader) => {
 
             response.statusCode = 200;
             response.setHeader('Content-Type', 'application/json');
@@ -67,7 +67,7 @@ leaderRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .delete((request, response, next) => {
+    .delete(authenticator.verifyUser, (request, response, next) => {
         Leaders.findByIdAndRemove(request.params.leaderId).then((result) => {
 
             response.statusCode = 200;

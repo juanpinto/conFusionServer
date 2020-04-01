@@ -7,6 +7,7 @@ const passport = require('passport');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const authenticate = require('./authenticate');
+const config = require('./config')
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -20,7 +21,7 @@ mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 mongoose.set('useFindAndModify', false);
 
-const databaseLocation = 'mongodb://localhost:27017/conFusion';
+const databaseLocation = config.mongoUrl;
 const dbConnection = mongoose.connect(databaseLocation);
 
 dbConnection.then(() => {
@@ -38,20 +39,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Adding cookie parser with secret.
-//app.use(cookieParser('12345-67890-09876-54321'));
-
-//Setting up express session
-app.use(session({
-  name: 'session-id',
-  secret: '12345-67890-09876-54321',
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}));
-
+//We don't need sessions anymore. We are using tokens now.
 app.use(passport.initialize());
-app.use(passport.session());
 /**
  * We allow the user to access this API. Even if they are not authenticated.
  * We achive this by placing this route before the authenticateUser.
@@ -69,21 +58,6 @@ app.use('/users', usersRouter);
  *  MIDDLEWARE.
  */
 
-function authenticateUser(request, response, next) {
-  console.log(request.session);
-
-  //request.user is added by passport.
-  if (!request.user) {
-    var err = new Error('unauthorized');
-    err.status = 403;
-    return next(err);
-  }
-  else {
-    next();
-  }
-}
-
-app.use(authenticateUser);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

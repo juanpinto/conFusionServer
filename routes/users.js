@@ -19,13 +19,27 @@ router.post('/signup', (request, response, next) => {
             response.setHeader('Content-Type', 'application/json');
             response.json({error: error});
         } else {
-            passport.authenticate('local', (error, user, info) => {
-                response.statusCode = 200;
-                response.setHeader('Content-Type', 'application/json');
-                response.json({success: true, user: user});
-            })(request, response, next);
+            if (request.body.firstname) {
+                user.firstname = request.body.firstname;
+            }
+            if (request.body.lastname) {
+                user.lastname = request.body.lastname;
+            }
+            user.save((error, user) => {
+                if (error) {
+                    response.statusCode = 500;
+                    response.setHeader('Content-Type', 'application/json');
+                    response.json({error: error});
+                } else {
+                    passport.authenticate('local', (error, user, info) => {
+                        response.statusCode = 200;
+                        response.setHeader('Content-Type', 'application/json');
+                        response.json({success: true, user: user});
+                    })(request, response, next);
+                }
+            });
         }
-    })
+    });
 });
 
 router.post('/login', passport.authenticate('local'), (request, response) => {

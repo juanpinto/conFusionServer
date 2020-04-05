@@ -17,8 +17,8 @@ const commentSchema = new Schema({
         required: true
     },
     author: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
     }
 }, {
     timestamps: true
@@ -55,7 +55,6 @@ const dishSchema = new Schema({
         type: Boolean,
         default: false
     },
-
     comments: [commentSchema]
 }, { timestamps: true });
 

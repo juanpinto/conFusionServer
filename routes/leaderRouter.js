@@ -18,7 +18,7 @@ leaderRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post(authenticator.verifyUser, (request, response, next) => {
+    .post(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Leaders.create(request.body).then((leader) => {
             response.statusCode = 200;
             response.setHeader('Content-Type', 'application/json');
@@ -27,11 +27,11 @@ leaderRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .put(authenticator.verifyUser, (request, response, next) => {
+    .put(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         response.statusCode = 403;
         response.end("Put operation not supported");
     })
-    .delete(authenticator.verifyUser, (request, response, next) => {
+    .delete(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Leaders.deleteMany({}).then((result) => {
 
             response.statusCode = 200;
@@ -53,11 +53,11 @@ leaderRouter.route('/:leaderId')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post(authenticator.verifyUser, (request, response, next) => {
+    .post(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         response.statusCode = 403;
         response.end(`Pust operation not supported on: /leaders/${request.params.leaderId}`);
     })
-    .put(authenticator.verifyUser, (request, response, next) => {
+    .put(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Leaders.findByIdAndUpdate(request.params.leaderId, {$set: request.body}, {new: true}).then((leader) => {
 
             response.statusCode = 200;
@@ -67,7 +67,7 @@ leaderRouter.route('/:leaderId')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .delete(authenticator.verifyUser, (request, response, next) => {
+    .delete(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Leaders.findByIdAndRemove(request.params.leaderId).then((result) => {
 
             response.statusCode = 200;
@@ -76,6 +76,6 @@ leaderRouter.route('/:leaderId')
 
         }, (error) => next(error))
             .catch((error) => next(error));
-    })
+    });
 
 module.exports = leaderRouter;

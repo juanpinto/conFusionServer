@@ -18,7 +18,7 @@ promotionRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post(authenticator.verifyUser, (request, response, next) => {
+    .post(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Promotions.create(request.body).then((promotion) => {
             response.statusCode = 200;
             response.setHeader('Content-Type', 'application/json');
@@ -27,11 +27,11 @@ promotionRouter.route('/')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .put(authenticator.verifyUser, (request, response, next) => {
+    .put(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         response.statusCode = 403;
         response.end("Put operation not supported");
     })
-    .delete(authenticator.verifyUser, (request, response, next) => {
+    .delete(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Promotions.deleteMany({}).then((result) => {
 
             response.statusCode = 200;
@@ -53,11 +53,11 @@ promotionRouter.route('/:promotionId')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post(authenticator.verifyUser, (request, response, next) => {
+    .post(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         response.statusCode = 403;
         response.end(`Pust operation not supported on: /dishes/${request.params.promotionId}`);
     })
-    .put(authenticator.verifyUser, (request, response, next) => {
+    .put(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Promotions.findByIdAndUpdate(request.params.promotionId, {$set: request.body}, {new: true}).then((promotion) => {
 
             response.statusCode = 200;
@@ -67,7 +67,7 @@ promotionRouter.route('/:promotionId')
         }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .delete(authenticator.verifyUser, (request, response, next) => {
+    .delete(authenticator.verifyUser, authenticator.verifyAdmin, (request, response, next) => {
         Promotions.findByIdAndRemove(request.params.promotionId).then((result) => {
 
             response.statusCode = 200;
